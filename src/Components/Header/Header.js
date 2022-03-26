@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { useNavigate } from 'react-router-dom'
 
 import './Header.css';
 import OlxLogo from '../../assets/OlxLogo';
@@ -6,7 +7,26 @@ import Search from '../../assets/Search';
 import Arrow from '../../assets/Arrow';
 import SellButton from '../../assets/SellButton';
 import SellButtonPlus from '../../assets/SellButtonPlus';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../../store/Context'
+import { getAuth, signOut } from 'firebase/auth'
+import { toast } from 'react-toastify';
+
+
 function Header() {
+  const { user } = useContext(AuthContext)
+  const auth = getAuth();
+  const navigate = useNavigate();
+
+  //Signout function
+  const handleSignout = () => {
+    signOut(auth).then((res) => {
+      navigate('/login')
+    }).catch((err) => {
+      toast.error(err.message)
+    })
+
+  }
   return (
     <div className="headerParentDiv">
       <div className="headerChildDiv">
@@ -34,16 +54,29 @@ function Header() {
           <Arrow></Arrow>
         </div>
         <div className="loginPage">
-          <span>Login</span>
+          {
+            user ? user.displayName
+              :
+              <Link style={{ color: 'black', fontWeight: 500 }} to='/login'>Login</Link>
+          }
           <hr />
         </div>
 
-        <div className="sellMenu">
-          <SellButton></SellButton>
-          <div className="sellMenuContent">
-            <SellButtonPlus></SellButtonPlus>
-            <span>SELL</span>
+        {
+          user ? <div onClick={handleSignout} style={{ backgroundColor: '#ffff', padding: '5px', borderRadius: '3px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <span>Logout</span>
           </div>
+            : ""
+        }
+
+        <div className="sellMenu">
+          <Link to='/create'>
+            <SellButton></SellButton>
+            <div className="sellMenuContent">
+              <SellButtonPlus></SellButtonPlus>
+              <span>SELL</span>
+            </div>
+          </Link>
         </div>
       </div>
     </div>
